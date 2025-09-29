@@ -1,0 +1,38 @@
+name: Deploy on Auto Beanz Dev Server
+
+on:
+  push:
+    branches:
+      - develop
+
+concurrency:
+  group: deploy-on-auto-beanz-dev-server-${{ github.ref }}
+  cancel-in-progress: false # Wait for the previous one to finish
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AUTO_BEANZ_DEV_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          # Add server to known_hosts to prevent interactive prompt
+          ssh-keyscan -H ${{ secrets.AUTO_BEANZ_DEV_SSH_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Run Deployment on server
+        run: |
+          ssh ${{ secrets.AUTO_BEANZ_DEV_SSH_USER }}@${{ secrets.AUTO_BEANZ_DEV_SSH_HOST }} << 'EOF'
+          cd autobeanz/erp-bench/apps/crm
+          git pull --rebase https://github.com/auto-beanz/crm.git
+          bench --site erp.autobeanz.com migrate
+          bench --site erp2.autobeanz.com migrate
+          bench build --app crm
+          bench restart
+          EOF
