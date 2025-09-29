@@ -215,59 +215,59 @@
   />
 </template>
 <script setup>
-import DeleteLinkedDocModal from '@/components/DeleteLinkedDocModal.vue'
-import ErrorPage from '@/components/ErrorPage.vue'
-import Icon from '@/components/Icon.vue'
-import Resizer from '@/components/Resizer.vue'
-import ActivityIcon from '@/components/Icons/ActivityIcon.vue'
-import EmailIcon from '@/components/Icons/EmailIcon.vue'
-import Email2Icon from '@/components/Icons/Email2Icon.vue'
-import CommentIcon from '@/components/Icons/CommentIcon.vue'
-import DetailsIcon from '@/components/Icons/DetailsIcon.vue'
-import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
-import TaskIcon from '@/components/Icons/TaskIcon.vue'
-import NoteIcon from '@/components/Icons/NoteIcon.vue'
-import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
-import IndicatorIcon from '@/components/Icons/IndicatorIcon.vue'
-import CameraIcon from '@/components/Icons/CameraIcon.vue'
-import LinkIcon from '@/components/Icons/LinkIcon.vue'
-import AttachmentIcon from '@/components/Icons/AttachmentIcon.vue'
-import LayoutHeader from '@/components/LayoutHeader.vue'
 import Activities from '@/components/Activities/Activities.vue'
 import AssignTo from '@/components/AssignTo.vue'
+import CustomActions from '@/components/CustomActions.vue'
+import DeleteLinkedDocModal from '@/components/DeleteLinkedDocModal.vue'
+import ErrorPage from '@/components/ErrorPage.vue'
 import FilesUploader from '@/components/FilesUploader/FilesUploader.vue'
+import Icon from '@/components/Icon.vue'
+import ActivityIcon from '@/components/Icons/ActivityIcon.vue'
+import AttachmentIcon from '@/components/Icons/AttachmentIcon.vue'
+import CameraIcon from '@/components/Icons/CameraIcon.vue'
+import CommentIcon from '@/components/Icons/CommentIcon.vue'
+import DetailsIcon from '@/components/Icons/DetailsIcon.vue'
+import Email2Icon from '@/components/Icons/Email2Icon.vue'
+import EmailIcon from '@/components/Icons/EmailIcon.vue'
+import IndicatorIcon from '@/components/Icons/IndicatorIcon.vue'
+import LinkIcon from '@/components/Icons/LinkIcon.vue'
+import NoteIcon from '@/components/Icons/NoteIcon.vue'
+import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
+import TaskIcon from '@/components/Icons/TaskIcon.vue'
+import WhatsAppIcon from '@/components/Icons/WhatsAppIcon.vue'
+import LayoutHeader from '@/components/LayoutHeader.vue'
+import ConvertToDealModal from '@/components/Modals/ConvertToDealModal.vue'
+import Resizer from '@/components/Resizer.vue'
 import SidePanelLayout from '@/components/SidePanelLayout.vue'
 import SLASection from '@/components/SLASection.vue'
-import CustomActions from '@/components/CustomActions.vue'
-import ConvertToDealModal from '@/components/Modals/ConvertToDealModal.vue'
+import { callEnabled, whatsappEnabled } from '@/composables/settings'
+import { useActiveTabManager } from '@/composables/useActiveTabManager'
+import { useDocument } from '@/data/document'
+import { globalStore } from '@/stores/global'
+import { getMeta } from '@/stores/meta'
+import { getSettings } from '@/stores/settings'
+import { statusesStore } from '@/stores/statuses'
 import {
+  copyToClipboard,
   openWebsite,
   setupCustomizations,
-  copyToClipboard,
   validateIsImageFile,
 } from '@/utils'
 import { getView } from '@/utils/view'
-import { getSettings } from '@/stores/settings'
-import { globalStore } from '@/stores/global'
-import { statusesStore } from '@/stores/statuses'
-import { getMeta } from '@/stores/meta'
-import { useDocument } from '@/data/document'
-import { whatsappEnabled, callEnabled } from '@/composables/settings'
 import {
-  createResource,
-  FileUploader,
-  Dropdown,
-  Tooltip,
   Avatar,
-  Tabs,
   Breadcrumbs,
   call,
-  usePageMeta,
+  createResource,
+  Dropdown,
+  FileUploader,
+  Tabs,
   toast,
+  Tooltip,
+  usePageMeta,
 } from 'frappe-ui'
-import { ref, computed, watch, nextTick } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useActiveTabManager } from '@/composables/useActiveTabManager'
+import { computed, nextTick, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 
 const { brand } = getSettings()
 const { $dialog, $socket, makeCall } = globalStore()
@@ -379,9 +379,19 @@ usePageMeta(() => {
 const tabs = computed(() => {
   let tabOptions = [
     {
+      name: 'Data',
+      label: __('Details'),
+      icon: DetailsIcon,
+    },
+    {
       name: 'Activity',
       label: __('Activity'),
       icon: ActivityIcon,
+    },
+    {
+      name: 'Calls',
+      label: __('Calls'),
+      icon: PhoneIcon,
     },
     {
       name: 'Emails',
@@ -389,19 +399,10 @@ const tabs = computed(() => {
       icon: EmailIcon,
     },
     {
-      name: 'Comments',
-      label: __('Comments'),
-      icon: CommentIcon,
-    },
-    {
-      name: 'Data',
-      label: __('Data'),
-      icon: DetailsIcon,
-    },
-    {
-      name: 'Calls',
-      label: __('Calls'),
-      icon: PhoneIcon,
+      name: 'WhatsApp',
+      label: __('WhatsApp'),
+      icon: WhatsAppIcon,
+      condition: () => whatsappEnabled.value,
     },
     {
       name: 'Tasks',
@@ -419,10 +420,9 @@ const tabs = computed(() => {
       icon: AttachmentIcon,
     },
     {
-      name: 'WhatsApp',
-      label: __('WhatsApp'),
-      icon: WhatsAppIcon,
-      condition: () => whatsappEnabled.value,
+      name: 'Comments',
+      label: __('Comments'),
+      icon: CommentIcon,
     },
   ]
   return tabOptions.filter((tab) => (tab.condition ? tab.condition() : true))
