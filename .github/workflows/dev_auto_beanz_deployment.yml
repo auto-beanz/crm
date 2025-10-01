@@ -30,7 +30,7 @@ jobs:
         run: |
           ssh ${{ secrets.AUTO_BEANZ_DEV_SSH_USER }}@${{ secrets.AUTO_BEANZ_DEV_SSH_HOST }} << 'EOF'
           cd autobeanz/erp-bench/apps/crm
-          git pull --rebase https://${{ secrets.AUTO_BEANZ_GIT_TOKEN }}@github.com/auto-beanz/crm.git
+          git pull https://${{ secrets.AUTO_BEANZ_GIT_TOKEN }}@github.com/auto-beanz/crm.git
           bench --site erp.autobeanz.com migrate
           bench --site erp2.autobeanz.com migrate
           bench build --app crm
