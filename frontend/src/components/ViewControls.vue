@@ -384,6 +384,11 @@ function getViewType() {
       label: __('Kanban'),
       icon: markRaw(KanbanIcon),
     },
+    calendar: {
+      name: 'calendar',
+      label: __('Calendar'),
+      icon: 'calendar',
+    },
   }
 
   return types[viewType]
@@ -602,6 +607,17 @@ if (allowedViews.includes('kanban')) {
     onClick() {
       viewUpdated.value = false
       router.push({ name: route.name, params: { viewType: 'kanban' } })
+    },
+  })
+}
+if (allowedViews.includes('calendar')) {
+  standardViews.push({
+    name: 'calendar',
+    label: __(props.options?.defaultViewName) || __('Calendar'),
+    icon: 'calendar',
+    onClick() {
+      viewUpdated.value = false
+      router.push({ name: route.name, params: { viewType: 'calendar' } })
     },
   })
 }
