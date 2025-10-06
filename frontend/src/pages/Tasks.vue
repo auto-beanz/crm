@@ -152,18 +152,11 @@
       </div>
     </template>
   </KanbanView>
-  <CalendarView
+  <Calendar
     v-else-if="$route.params.viewType == 'calendar' && rows.length"
-    :tasks="tasks"
-    :modalOpen="showTaskModal"
-    :options="{
-      onClick: (event) => showTask(Number(event.taskId)),
-      onDateClick: (info) => createTaskOnDate(info.date),
-      onEventDrop: (info) => handleTaskDateChange(info),
-    }"
-    @eventClick="(event) => showTask(Number(event.taskId))"
-    @dateClick="(info) => createTaskOnDate(info.date)"
-    @eventDrop="(info) => handleTaskDateChange(info)"
+    :events="calendarEvents"
+    :config="{ defaultMode: 'Month', isEditMode: false }"
+    :onCellClick="(data) => createTaskOnDate(data.date)"
     class="calendar-view-container"
     :class="{ 'modal-open': showTaskModal }"
   />
@@ -213,7 +206,6 @@
 </template>
 
 <script setup>
-import CalendarView from '@/components/CalendarView.vue'
 import CustomActions from '@/components/CustomActions.vue'
 import ArrowUpRightIcon from '@/components/Icons/ArrowUpRightIcon.vue'
 import Email2Icon from '@/components/Icons/Email2Icon.vue'
@@ -229,6 +221,7 @@ import { getMeta } from '@/stores/meta'
 import { usersStore } from '@/stores/users'
 import { formatDate, timeAgo } from '@/utils'
 import { Avatar, Dropdown, TextEditor, Tooltip, call } from 'frappe-ui'
+import Calendar from 'frappe-ui/src/components/Calendar/Calendar.vue'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -256,6 +249,55 @@ function getRow(name, field) {
   }
   return getValue(rows.value?.find((row) => row.name == name)[field])
 }
+
+// Transform tasks data for frappe-ui Calendar
+const calendarEvents = computed(() => {
+  if (!tasks.value?.data?.data) return []
+
+  const taskData = tasks.value.data.data
+  const allTasks = Array.isArray(taskData)
+    ? taskData
+    : taskData.flatMap((column) => column.data || [])
+
+  const events = allTasks
+    .filter((task) => task.due_date) // Only show tasks with due dates
+    .map((task) => {
+      // Get color based on status
+      const getStatusColor = (status) => {
+        const colors = {
+          Backlog: 'gray',
+          Todo: 'blue',
+          'In Progress': 'orange',
+          Done: 'green',
+          Cancelled: 'red',
+        }
+        return colors[status] || 'gray'
+      }
+
+      const event = {
+        id: task.name,
+        title: task.title || 'Untitled Task',
+        fromDate: task.due_date.split(' ')[0],
+        toDate: task.due_date.split(' ')[0],
+        fromTime: task.due_date.split(' ')[1] || '00:00',
+        toTime: task.due_date.split(' ')[1] || '23:59',
+        color: getStatusColor(task.status),
+        isFullDay: true,
+        // Store additional task data for event handlers
+        taskData: {
+          status: task.status,
+          priority: task.priority,
+          assigned_to: task.assigned_to,
+          description: task.description,
+          reference_doctype: task.reference_doctype,
+          reference_docname: task.reference_docname,
+        },
+      }
+      return event
+    })
+
+  return events
+})
 
 const rows = computed(() => {
   if (!tasks.value?.data?.data) return []
@@ -385,36 +427,21 @@ function createTask(column) {
 }
 
 function createTaskOnDate(date) {
+  // Handle both Date object and string formats
+  const dateStr = date instanceof Date ? date.toISOString().split('T')[0] : date
+
   task.value = {
     name: '',
     title: '',
     description: '',
     assigned_to: '',
-    due_date: date.toISOString().split('T')[0], // Format date as YYYY-MM-DD
+    due_date: dateStr, // Format date as YYYY-MM-DD
     status: 'Backlog',
     priority: 'Low',
     reference_doctype: 'CRM Lead',
     reference_docname: '',
   }
   showTaskModal.value = true
-}
-
-async function handleTaskDateChange(info) {
-  try {
-    const newDate = info.newStart.toISOString().split('T')[0]
-    await call('frappe.client.set_value', {
-      doctype: 'CRM Task',
-      name: info.taskId,
-      fieldname: 'due_date',
-      value: newDate,
-    })
-    // Reload tasks to reflect the change
-    tasks.value.reload()
-  } catch (error) {
-    console.error('Failed to update task date:', error)
-    // Revert the calendar change if the update failed
-    info.revert()
-  }
 }
 
 function actions(name) {
@@ -460,25 +487,11 @@ const openTaskFromURL = () => {
 </script>
 
 <style scoped>
-.calendar-view-container {
-  position: relative;
-  z-index: 1;
-}
-
 /* When modal is open, hide calendar or reduce its interactivity */
 .calendar-view-container.modal-open {
   z-index: 0 !important;
   pointer-events: none;
   opacity: 0.5;
   filter: blur(1px);
-}
-
-/* Ensure modal appears above calendar */
-:deep(.calendar-view-container *) {
-  z-index: 1 !important;
-}
-
-:deep(.calendar-view-container.modal-open *) {
-  z-index: 0 !important;
 }
 </style>
