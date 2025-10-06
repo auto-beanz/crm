@@ -29,6 +29,7 @@ jobs:
       - name: Run Deployment on server
         run: |
           ssh ${{ secrets.AUTO_BEANZ_DEV_SSH_USER }}@${{ secrets.AUTO_BEANZ_DEV_SSH_HOST }} << 'EOF'
+          set -e  # Exit immediately if any command fails
           cd autobeanz/erp-bench/apps/crm
           git pull upstream main
           bench --site erp.autobeanz.com migrate
