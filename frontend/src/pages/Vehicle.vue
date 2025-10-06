@@ -21,27 +21,9 @@
         doctype="Vehicle"
         :docname="vehicleId"
       />
-      <Button
-        :label="__('Edit')"
-        icon="edit"
-        @click="showVehicleModal = true"
-      />
     </template>
   </LayoutHeader>
   <div v-if="doc.name" class="flex h-full overflow-hidden">
-    <Tabs as="div" v-model="tabIndex" :tabs="tabs">
-      <template #tab-panel>
-        <Activities
-          ref="activities"
-          doctype="Vehicle"
-          :docname="vehicleId"
-          :tabs="tabs"
-          v-model:reload="reload"
-          v-model:tabIndex="tabIndex"
-          @afterSave="reloadAssignees"
-        />
-      </template>
-    </Tabs>
     <Resizer side="right" class="flex flex-col justify-between border-l">
       <div
         class="flex h-10.5 cursor-copy items-center border-b px-5 py-2.5 text-lg font-medium text-ink-gray-9"
@@ -160,40 +142,22 @@
       </div>
     </Resizer>
   </div>
-
-  <!-- Vehicle Modal for Editing -->
-  <VehicleModal
-    v-if="showVehicleModal"
-    v-model="showVehicleModal"
-    :vehicle="vehicle.doc"
-    :options="{
-      redirect: false,
-      afterInsert: () => {
-        vehicle.reload()
-        showVehicleModal = false
-      },
-    }"
-  />
 </template>
 
 <script setup>
-import Activities from '@/components/Activities.vue'
 import AssignTo from '@/components/AssignTo.vue'
 import CustomActions from '@/components/CustomActions.vue'
+import Icon from '@/components/Icon.vue'
 import VehicleIcon from '@/components/Icons/VehicleIcon.vue'
 import LayoutHeader from '@/components/LayoutHeader.vue'
-import VehicleModal from '@/components/Modals/VehicleModal.vue'
-import { useDoc } from '@/composables/useDoc'
+import Resizer from '@/components/Resizer.vue'
+import { useDocument } from '@/data/document'
 import { copyToClipboard, formatDate } from '@/utils'
 import {
   Badge,
   Breadcrumbs,
-  Button,
   createDocumentResource,
   createListResource,
-  Icon,
-  Resizer,
-  Tabs,
   Tooltip,
 } from 'frappe-ui'
 import { computed, ref, watch } from 'vue'
@@ -207,7 +171,6 @@ const props = defineProps({
 })
 
 const route = useRoute()
-const showVehicleModal = ref(false)
 const errorTitle = ref(null)
 
 const vehicle = createDocumentResource({
@@ -235,7 +198,7 @@ const assignees = createListResource({
   },
 })
 
-const { document, reload } = useDoc('Vehicle', props.vehicleId)
+const { document, reload } = useDocument('Vehicle', props.vehicleId)
 
 const doc = computed(() => vehicle.doc || {})
 
