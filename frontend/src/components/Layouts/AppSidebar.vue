@@ -140,54 +140,55 @@
 </template>
 
 <script setup>
-import LucideLayoutDashboard from '~icons/lucide/layout-dashboard'
-import CRMLogo from '@/components/Icons/CRMLogo.vue'
-import InviteIcon from '@/components/Icons/InviteIcon.vue'
-import ConvertIcon from '@/components/Icons/ConvertIcon.vue'
-import CommentIcon from '@/components/Icons/CommentIcon.vue'
-import EmailIcon from '@/components/Icons/EmailIcon.vue'
-import StepsIcon from '@/components/Icons/StepsIcon.vue'
-import Section from '@/components/Section.vue'
-import PinIcon from '@/components/Icons/PinIcon.vue'
-import UserDropdown from '@/components/UserDropdown.vue'
-import SquareAsterisk from '@/components/Icons/SquareAsterisk.vue'
-import LeadsIcon from '@/components/Icons/LeadsIcon.vue'
-import DealsIcon from '@/components/Icons/DealsIcon.vue'
-import ContactsIcon from '@/components/Icons/ContactsIcon.vue'
-import OrganizationsIcon from '@/components/Icons/OrganizationsIcon.vue'
-import NoteIcon from '@/components/Icons/NoteIcon.vue'
-import TaskIcon from '@/components/Icons/TaskIcon.vue'
-import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
 import CollapseSidebar from '@/components/Icons/CollapseSidebar.vue'
-import NotificationsIcon from '@/components/Icons/NotificationsIcon.vue'
+import CommentIcon from '@/components/Icons/CommentIcon.vue'
+import ContactsIcon from '@/components/Icons/ContactsIcon.vue'
+import ConvertIcon from '@/components/Icons/ConvertIcon.vue'
+import CRMLogo from '@/components/Icons/CRMLogo.vue'
+import DealsIcon from '@/components/Icons/DealsIcon.vue'
+import EmailIcon from '@/components/Icons/EmailIcon.vue'
 import HelpIcon from '@/components/Icons/HelpIcon.vue'
-import SidebarLink from '@/components/SidebarLink.vue'
+import InviteIcon from '@/components/Icons/InviteIcon.vue'
+import LeadsIcon from '@/components/Icons/LeadsIcon.vue'
+import NoteIcon from '@/components/Icons/NoteIcon.vue'
+import NotificationsIcon from '@/components/Icons/NotificationsIcon.vue'
+import OrganizationsIcon from '@/components/Icons/OrganizationsIcon.vue'
+import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
+import PinIcon from '@/components/Icons/PinIcon.vue'
+import SquareAsterisk from '@/components/Icons/SquareAsterisk.vue'
+import StepsIcon from '@/components/Icons/StepsIcon.vue'
+import TaskIcon from '@/components/Icons/TaskIcon.vue'
 import Notifications from '@/components/Notifications.vue'
+import Section from '@/components/Section.vue'
 import Settings from '@/components/Settings/Settings.vue'
-import { viewsStore } from '@/stores/views'
-import {
-  unreadNotificationsCount,
-  notificationsStore,
-} from '@/stores/notifications'
-import { usersStore } from '@/stores/users'
-import { sessionStore } from '@/stores/session'
-import { showSettings, activeSettingsPage } from '@/composables/settings'
+import SidebarLink from '@/components/SidebarLink.vue'
+import UserDropdown from '@/components/UserDropdown.vue'
 import { showChangePasswordModal } from '@/composables/modals'
+import { activeSettingsPage, showSettings } from '@/composables/settings'
+import router from '@/router'
+import {
+  notificationsStore,
+  unreadNotificationsCount,
+} from '@/stores/notifications'
+import { sessionStore } from '@/stores/session'
+import { usersStore } from '@/stores/users'
+import { viewsStore } from '@/stores/views'
+import { capture } from '@/telemetry'
+import { useStorage } from '@vueuse/core'
 import { FeatherIcon, call } from 'frappe-ui'
 import {
+  GettingStartedBanner,
+  HelpModal,
+  IntermediateStepModal,
   SignupBanner,
   TrialBanner,
-  HelpModal,
-  GettingStartedBanner,
-  useOnboarding,
-  showHelpModal,
   minimize,
-  IntermediateStepModal,
+  showHelpModal,
+  useOnboarding,
 } from 'frappe-ui/frappe'
-import { capture } from '@/telemetry'
-import router from '@/router'
-import { useStorage } from '@vueuse/core'
-import { ref, reactive, computed, h, markRaw, onMounted } from 'vue'
+import { computed, h, markRaw, onMounted, reactive, ref } from 'vue'
+import LucideLayoutDashboard from '~icons/lucide/layout-dashboard'
+import VehiclesIcon from '../Icons/VehiclesIcon.vue'
 
 const { getPinnedViews, getPublicViews } = viewsStore()
 const { toggle: toggleNotificationPanel } = notificationsStore()
@@ -217,6 +218,11 @@ const links = [
     label: 'Contacts',
     icon: ContactsIcon,
     to: 'Contacts',
+  },
+  {
+    label: 'Vehicles',
+    icon: VehiclesIcon,
+    to: 'Vehicles',
   },
   {
     label: 'Organizations',
