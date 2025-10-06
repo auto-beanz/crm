@@ -1,7 +1,7 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { userResource } from '@/stores/user'
 import { sessionStore } from '@/stores/session'
+import { userResource } from '@/stores/user'
 import { viewsStore } from '@/stores/views'
+import { createRouter, createWebHistory } from 'vue-router'
 
 const routes = [
   {
@@ -85,6 +85,18 @@ const routes = [
     component: () => import('@/pages/CallLogs.vue'),
   },
   {
+    alias: '/vehicles',
+    path: '/vehicles/view/:viewType?',
+    name: 'Vehicles',
+    component: () => import('@/pages/Vehicles.vue'),
+  },
+  {
+    path: '/vehicles/:vehicleId',
+    name: 'Vehicle',
+    component: () => import(`@/pages/${handleMobileView('Vehicle')}.vue`),
+    props: true,
+  },
+  {
     path: '/welcome',
     name: 'Welcome',
     component: () => import('@/pages/Welcome.vue'),
@@ -124,7 +136,11 @@ router.beforeEach(async (to, from, next) => {
     route_name = route_name || 'Leads'
 
     if (name && !is_standard) {
-      next({ name: route_name, params: { viewType: type }, query: { view: name } })
+      next({
+        name: route_name,
+        params: { viewType: type },
+        query: { view: name },
+      })
     } else {
       next({ name: route_name, params: { viewType: type } })
     }

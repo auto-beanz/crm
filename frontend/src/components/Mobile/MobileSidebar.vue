@@ -83,31 +83,29 @@
   </TransitionRoot>
 </template>
 <script setup>
+import ContactsIcon from '@/components/Icons/ContactsIcon.vue'
+import DealsIcon from '@/components/Icons/DealsIcon.vue'
+import Email2Icon from '@/components/Icons/Email2Icon.vue'
+import LeadsIcon from '@/components/Icons/LeadsIcon.vue'
+import NoteIcon from '@/components/Icons/NoteIcon.vue'
+import NotificationsIcon from '@/components/Icons/NotificationsIcon.vue'
+import OrganizationsIcon from '@/components/Icons/OrganizationsIcon.vue'
+import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
+import PinIcon from '@/components/Icons/PinIcon.vue'
+import TaskIcon from '@/components/Icons/TaskIcon.vue'
+import Section from '@/components/Section.vue'
+import SidebarLink from '@/components/SidebarLink.vue'
+import UserDropdown from '@/components/UserDropdown.vue'
+import { mobileSidebarOpened as sidebarOpened } from '@/composables/settings'
+import { unreadNotificationsCount } from '@/stores/notifications'
+import { viewsStore } from '@/stores/views'
 import {
-  TransitionRoot,
-  TransitionChild,
   Dialog,
   DialogOverlay,
+  TransitionChild,
+  TransitionRoot,
 } from '@headlessui/vue'
-import Section from '@/components/Section.vue'
-import Email2Icon from '@/components/Icons/Email2Icon.vue'
-import PinIcon from '@/components/Icons/PinIcon.vue'
-import UserDropdown from '@/components/UserDropdown.vue'
-import LeadsIcon from '@/components/Icons/LeadsIcon.vue'
-import DealsIcon from '@/components/Icons/DealsIcon.vue'
-import ContactsIcon from '@/components/Icons/ContactsIcon.vue'
-import OrganizationsIcon from '@/components/Icons/OrganizationsIcon.vue'
-import NoteIcon from '@/components/Icons/NoteIcon.vue'
-import TaskIcon from '@/components/Icons/TaskIcon.vue'
-import PhoneIcon from '@/components/Icons/PhoneIcon.vue'
-import NotificationsIcon from '@/components/Icons/NotificationsIcon.vue'
-import SidebarLink from '@/components/SidebarLink.vue'
-import { viewsStore } from '@/stores/views'
-import { unreadNotificationsCount } from '@/stores/notifications'
-import { createResource } from 'frappe-ui'
-import { TrialBanner } from 'frappe-ui/frappe'
-import { computed, h, provide } from 'vue'
-import { mobileSidebarOpened as sidebarOpened } from '@/composables/settings'
+import { computed, h } from 'vue'
 
 const { getPinnedViews, getPublicViews } = viewsStore()
 
@@ -141,6 +139,11 @@ const links = [
     label: 'Tasks',
     icon: TaskIcon,
     to: 'Tasks',
+  },
+  {
+    label: 'Vehicles',
+    icon: PinIcon,
+    to: 'Vehicles',
   },
   {
     label: 'Call Logs',
