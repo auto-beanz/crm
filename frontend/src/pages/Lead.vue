@@ -17,7 +17,7 @@
         :actions="document.actions"
       />
       <AssignTo v-model="assignees.data" doctype="CRM Lead" :docname="leadId" />
-      <Dropdown
+      <!-- <Dropdown
         v-if="doc && document.statuses"
         :options="statuses"
         placement="right"
@@ -32,8 +32,35 @@
               <IndicatorIcon :class="getLeadStatus(doc.status).color" />
             </template>
           </Button>
+        </template> -->
+      <Dropdown
+        v-if="workflowActions.length"
+        :options="
+          workflowActions.map((a) => ({
+            label: a.action,
+            onClick: () => applyWorkflowAction(a.action),
+          }))
+        "
+        placement="right"
+      >
+        <template #default="{ open }">
+          <Button
+            :label="doc.status || __('Actions')"
+            :iconRight="open ? 'chevron-up' : 'chevron-down'"
+            variant="subtle"
+          >
+            <template #prefix>
+              <IndicatorIcon :class="getLeadStatus(doc.status)?.color" />
+            </template>
+          </Button>
         </template>
       </Dropdown>
+      <Button v-else :label="doc.status || __('No Status')" variant="subtle">
+        <template #prefix>
+          <IndicatorIcon :class="getLeadStatus(doc.status)?.color" />
+        </template>
+      </Button>
+
       <Button
         :label="__('Convert to Deal')"
         variant="solid"
@@ -266,7 +293,7 @@ import {
   Tooltip,
   usePageMeta,
 } from 'frappe-ui'
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const { brand } = getSettings()
@@ -291,6 +318,7 @@ const errorMessage = ref('')
 const showDeleteLinkedDocModal = ref(false)
 const showConvertToDealModal = ref(false)
 const showFilesUploader = ref(false)
+const workflowActions = ref([])
 
 const { triggerOnChange, assignees, document, scripts, error } = useDocument(
   'CRM Lead',
@@ -333,6 +361,10 @@ watch(
     }
   },
   { once: true },
+)
+watch(
+  () => doc.value.status,
+  () => loadWorkflowActions(),
 )
 
 const breadcrumbs = computed(() => {
@@ -488,4 +520,43 @@ function reloadAssignees(data) {
     assignees.reload()
   }
 }
+
+async function loadWorkflowActions() {
+  try {
+    const res = await call('frappe.model.workflow.get_transitions', {
+      doc: JSON.stringify({
+        doctype: 'CRM Lead',
+        name: props.leadId,
+      }),
+    })
+    workflowActions.value = res.map((t) => ({
+      action: t.action,
+      nextState: t.next_state,
+    }))
+  } catch (e) {
+    console.warn('No workflow transitions found:', e)
+    workflowActions.value = []
+  }
+}
+
+async function applyWorkflowAction(actionName) {
+  try {
+    await call('frappe.model.workflow.apply_workflow', {
+      doc: JSON.stringify({
+        doctype: 'CRM Lead',
+        name: props.leadId,
+      }),
+      action: actionName,
+    })
+    toast.success(__('Workflow updated'))
+    await document.reload()
+    await loadWorkflowActions()
+  } catch (e) {
+    toast.error(e.messages?.[0] || __('Failed to apply workflow'))
+  }
+}
+
+onMounted(() => {
+  loadWorkflowActions()
+})
 </script>
