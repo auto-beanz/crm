@@ -159,6 +159,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  optionsList: {
+    type: Array,
+    default: null,
+  },
 })
 
 const values = defineModel()
@@ -183,7 +187,7 @@ const selectedValue = computed({
   },
 })
 
-const options = computed(() => {
+/*const options = computed(() => {
   let userEmails = props.fetchUsers ? users?.data?.allUsers : []
 
   if (props.fetchUsers) {
@@ -210,6 +214,49 @@ const options = computed(() => {
       label: query.value,
       value: query.value,
     })
+  }
+
+  return userEmails || []
+})*/
+
+const options = computed(() => {
+  let userEmails = []
+
+  // --- START OF FIX ---
+  // 1. If parent provides a list, use it.
+  if (props.optionsList) {
+    userEmails = props.optionsList
+  } 
+  // 2. If not, use the global store (original logic)
+  else if (props.fetchUsers) {
+    userEmails = users?.data?.allUsers?.map((user) => ({
+      label: user.full_name || user.name || user.email,
+      value: user.email,
+    })) || []
+  } 
+  // 3. Fallback for typing new emails
+  else if (!userEmails?.length && query.value) {
+    userEmails.push({
+      label: query.value,
+      value: query.value,
+    })
+  }
+  // --- END OF FIX ---
+
+  // Filter out existing emails
+  if (props.existingEmails?.length) {
+    userEmails = userEmails.filter((option) => {
+      return !props.existingEmails.includes(option.value)
+    })
+  }
+
+  // Filter by what the user is typing in the search box
+  if (query.value) {
+    userEmails = userEmails.filter(
+      (option) =>
+        option.label.toLowerCase().includes(query.value.toLowerCase()) ||
+        option.value.toLowerCase().includes(query.value.toLowerCase()),
+    )
   }
 
   return userEmails || []
