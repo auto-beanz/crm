@@ -3,53 +3,75 @@ import frappe
 
 @frappe.whitelist()
 def get_users():
-	users = frappe.qb.get_query(
-		"User",
-		fields=[
-			"name",
-			"email",
-			"enabled",
-			"user_image",
-			"first_name",
-			"last_name",
-			"full_name",
-			"user_type",
-		],
-		order_by="full_name asc",
-		distinct=True,
-	).run(as_dict=1)
+    users = frappe.qb.get_query(
+        "User",
+        fields=[
+            "name",
+            "email",
+            "enabled",
+            "user_image",
+            "first_name",
+            "last_name",
+            "full_name",
+            "user_type",
+        ],
+        order_by="full_name asc",
+        distinct=True,
+    ).run(as_dict=1)
 
-	for user in users:
-		if frappe.session.user == user.name:
-			user.session_user = True
+    user_list = [user.name for user in users]
 
-		user.roles = frappe.get_roles(user.name)
+    employee_data = frappe.get_all("Employee",
+                                    filters={"user_id": ("in", user_list)},
+                                    fields=["user_id", "company"])
+    
+    company_map = {emp.user_id: emp.company for emp in employee_data}
 
-		user.role = ""
+    crm_roles = [
+        "System Manager",
+        "Sales Manager",
+        "Sales User",
+        "Aftersales Executive",
+        "Customer Support Executive",
+        "Business Development Executive",
+    ]
 
-		if "System Manager" in user.roles:
-			user.role = "System Manager"
-		elif "Sales Manager" in user.roles:
-			user.role = "Sales Manager"
-		elif "Sales User" in user.roles:
-			user.role = "Sales User"
-		elif "Guest" in user.roles:
-			user.role = "Guest"
+    for user in users:
+        if frappe.session.user == user.name:
+            user.session_user = True
 
-		if frappe.session.user == user.name:
-			user.session_user = True
+        user.roles = frappe.get_roles(user.name)
+        user.role = ""
 
-		user.is_telephony_agent = frappe.db.exists("CRM Telephony Agent", {"user": user.name})
+        if "System Manager" in user.roles:
+            user.role = "System Manager"
+        elif "Sales Manager" in user.roles:
+            user.role = "Sales Manager"
+        elif "Sales User" in user.roles:
+            user.role = "Sales User"
+        elif "Aftersales Executive" in user.roles:
+            user.role = "Aftersales Executive"
+        elif "Customer Support Executive" in user.roles:
+            user.role = "Customer Support Executive"
+        elif "Business Development Executive" in user.roles:
+            user.role = "Business Development Executive"
+        elif "Guest" in user.roles:
+            user.role = "Guest"
 
-	crm_users = []
+        if frappe.session.user == user.name:
+            user.session_user = True
+            
+        user.company = company_map.get(user.name)
 
-	# crm users are users with role Sales User or Sales Manager
-	for user in users:
-		if "Sales User" in user.roles or "Sales Manager" in user.roles:
-			crm_users.append(user)
+        user.is_telephony_agent = frappe.db.exists("CRM Telephony Agent", {"user": user.name})
 
-	return users, crm_users
+    crm_users = []
 
+    for user in users:
+        if any(role in crm_roles for role in user.roles):
+            crm_users.append(user)
+
+    return users, crm_users
 
 @frappe.whitelist()
 def get_organizations():
