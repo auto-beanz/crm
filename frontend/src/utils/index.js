@@ -235,6 +235,27 @@ export function taskPriorityOptions(action, data) {
   })
 }
 
+export function taskTypeOptions(action, data) {
+  let options = []
+  let typeMeta = getMeta('CRM Task')
+    .getFields()
+    ?.find((field) => field.fieldname == 'custom_type')
+
+  if (typeMeta && typeMeta.options) {
+    // If options exist, split them into an array
+    options = typeMeta.options
+      .map((option) => option.value)
+      .filter((option) => option)
+  }
+
+  return options.map((type) => {
+    return {
+      label: type,
+      onClick: () => action && action(type, data),
+    }
+  })
+}
+
 export function openWebsite(url) {
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
     url = 'https://' + url

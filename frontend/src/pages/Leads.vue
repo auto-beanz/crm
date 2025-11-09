@@ -569,6 +569,7 @@ const task = ref({
   due_date: '',
   priority: 'Low',
   status: 'Backlog',
+  custom_type: '',
 })
 
 function showTask(name) {

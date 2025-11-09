@@ -291,6 +291,7 @@ const calendarEvents = computed(() => {
           description: task.description,
           reference_doctype: task.reference_doctype,
           reference_docname: task.reference_docname,
+          custom_type: task.custom_type,
         },
       }
       return event
@@ -382,6 +383,7 @@ const task = ref({
   priority: 'Low',
   reference_doctype: 'CRM Lead',
   reference_docname: '',
+  custom_type: '',
 })
 
 function showTask(name) {
@@ -397,6 +399,7 @@ function showTask(name) {
     due_date: t.due_date,
     status: t.status,
     priority: t.priority,
+    custom_type: t.custom_type,
     reference_doctype: t.reference_doctype,
     reference_docname: t.reference_docname,
   }
@@ -414,6 +417,7 @@ function createTask(column) {
     priority: 'Low',
     reference_doctype: 'CRM Lead',
     reference_docname: '',
+    custom_type: '',
   }
 
   if (column.column?.name) {
@@ -440,6 +444,7 @@ function createTaskOnDate(date) {
     priority: 'Low',
     reference_doctype: 'CRM Lead',
     reference_docname: '',
+    custom_type: '',
   }
   showTaskModal.value = true
 }
