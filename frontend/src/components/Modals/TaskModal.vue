@@ -30,6 +30,17 @@
           />
         </div>
         <div>
+          <FormControl
+            ref="custom_type"
+            type="select"
+            :label="__('Type')"
+            v-model="_task.custom_type"
+            :placeholder="__('Select Task Type')"
+            :options="taskTypeOptions(updateTaskType)"
+            required
+          />
+        </div>
+        <div>
           <div class="mb-1.5 text-xs text-ink-gray-5">
             {{ __('Description') }}
           </div>
@@ -116,7 +127,12 @@ import TaskPriorityIcon from '@/components/Icons/TaskPriorityIcon.vue'
 import ArrowUpRightIcon from '@/components/Icons/ArrowUpRightIcon.vue'
 import UserAvatar from '@/components/UserAvatar.vue'
 import Link from '@/components/Controls/Link.vue'
-import { taskStatusOptions, taskPriorityOptions, getFormat } from '@/utils'
+import {
+  taskStatusOptions,
+  taskPriorityOptions,
+  getFormat,
+  taskTypeOptions,
+} from '@/utils'
 import { usersStore } from '@/stores/users'
 import { capture } from '@/telemetry'
 import { TextEditor, Dropdown, Tooltip, call, DateTimePicker } from 'frappe-ui'
@@ -160,6 +176,7 @@ const _task = ref({
   priority: 'Low',
   reference_doctype: props.doctype,
   reference_docname: null,
+  custom_type: '',
 })
 
 function updateTaskStatus(status) {
@@ -168,6 +185,10 @@ function updateTaskStatus(status) {
 
 function updateTaskPriority(priority) {
   _task.value.priority = priority
+}
+
+function updateTaskType(custom_type) {
+  _task.value.custom_type = custom_type
 }
 
 function redirect() {
@@ -181,6 +202,25 @@ function redirect() {
 }
 
 async function updateTask() {
+  const missingFields = []
+
+  if (!_task.value.title) {
+    missingFields.push(__('Title'))
+  }
+
+  if (!_task.value.custom_type) {
+    missingFields.push(__('Task Type'))
+  }
+
+  if (missingFields.length) {
+    if (missingFields.length === 1) {
+      error.value = `${missingFields[0]} ${__('is mandatory')}`
+    } else {
+      error.value = `${missingFields.join(` ${__('and ')} `)} ${__('are mandatory')}`
+    }
+    return
+  }
+
   if (!_task.value.assigned_to) {
     _task.value.assigned_to = getUser().name
   }

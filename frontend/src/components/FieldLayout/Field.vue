@@ -226,7 +226,7 @@ import { getMeta } from '@/stores/meta'
 import { usersStore } from '@/stores/users'
 import { useDocument } from '@/data/document'
 import { Tooltip, DatePicker, DateTimePicker } from 'frappe-ui'
-import { computed, provide, inject } from 'vue'
+import { computed, provide, inject, watch } from 'vue'
 
 const props = defineProps({
   field: Object,
@@ -260,6 +260,35 @@ if (!isGridRow) {
   triggerOnChange = inject('triggerOnChange', () => {})
   parentDoc = inject('parentDoc')
 }
+/**
+ * 🔧 Helper: Parse and evaluate "eval:" filters dynamically
+ */
+function parseLinkFilters(link_filters, doc) {
+  if (!link_filters) return null
+
+  let filters
+  try {
+    filters = JSON.parse(link_filters)
+  } catch (e) {
+    console.warn('Invalid link_filters JSON:', link_filters)
+    return null
+  }
+
+  return filters.map(([doctype, fieldname, operator, value]) => {
+    if (typeof value === 'string' && value.startsWith('eval:')) {
+      const expr = value.replace('eval:', '').trim()
+      try {
+        // Safely evaluate with access to `doc`
+        const result = new Function('doc', `return ${expr}`)(doc)
+        return [doctype, fieldname, operator, result]
+      } catch (err) {
+        console.error('Error evaluating filter expression:', expr, err)
+        return [doctype, fieldname, operator, null]
+      }
+    }
+    return [doctype, fieldname, operator, value]
+  })
+}
 
 const field = computed(() => {
   let field = props.field
@@ -292,9 +321,20 @@ const field = computed(() => {
     }
   }
 
+  let filters = null
+  if (
+    field.fieldtype === 'Link' &&
+    ['custom_model', 'custom_trim'].includes(field.fieldname)
+  ) {
+    // Dynamically evaluate filters based on current data
+    filters = parseLinkFilters(field.link_filters, data.value)
+  } else if (field.link_filters) {
+    filters = JSON.parse(field.link_filters)
+  }
+
   let _field = {
     ...field,
-    filters: field.link_filters && JSON.parse(field.link_filters),
+    filters: filters,
     placeholder: field.placeholder || field.label,
     display_via_depends_on: evaluateDependsOnValue(
       field.depends_on,
@@ -309,6 +349,32 @@ const field = computed(() => {
   _field.visible = isFieldVisible(_field)
   return _field
 })
+
+watch(
+  () => data.value.custom_make,
+  (newVal) => {
+    if (!newVal) return
+    if (props.field.fieldname === 'custom_model') {
+      field.value.filters = parseLinkFilters(
+        props.field.link_filters,
+        data.value,
+      )
+    }
+  },
+)
+
+watch(
+  () => data.value.custom_model,
+  (newVal) => {
+    if (!newVal) return
+    if (props.field.fieldname === 'custom_trim') {
+      field.value.filters = parseLinkFilters(
+        props.field.link_filters,
+        data.value,
+      )
+    }
+  },
+)
 
 function isFieldVisible(field) {
   if (preview.value) return true
