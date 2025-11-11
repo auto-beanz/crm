@@ -62,6 +62,7 @@
       </Button>
 
       <Button
+        v-if="doc.status === 'Pre-Qualified'"
         :label="__('Convert to Deal')"
         variant="solid"
         @click="showConvertToDealModal = true"
@@ -411,7 +412,7 @@ usePageMeta(() => {
 const tabs = computed(() => {
   let tabOptions = [
     {
-      name: 'Data',
+      name: 'Details',
       label: __('Details'),
       icon: DetailsIcon,
     },
