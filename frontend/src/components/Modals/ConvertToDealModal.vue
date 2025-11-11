@@ -68,6 +68,19 @@
         </div>
       </div>
 
+      <div class="mb-4 mt-6 flex items-center gap-2 text-ink-gray-5">
+        <label class="block text-base">{{ __('Assign Dealer') }}</label>
+      </div>
+      <div class="ml-6 text-ink-gray-9">
+        <Link
+          class="form-control mt-2.5"
+          size="md"
+          :value="assignDealer"
+          doctype="Sales Partner"
+          @change="(data) => (assignDealer = data)"
+        />
+      </div>
+
       <div v-if="dealTabs.data?.length" class="h-px w-full border-t my-6" />
 
       <FieldLayout
@@ -124,6 +137,7 @@ const existingOrganizationChecked = ref(false)
 
 const existingContact = ref('')
 const existingOrganization = ref('')
+const assignDealer = ref('')
 const error = ref('')
 
 const { triggerConvertToDeal } = useDocument('CRM Lead', props.lead.name)
@@ -142,6 +156,11 @@ async function convertToDeal() {
     return
   }
 
+  if (!assignDealer.value) {
+    error.value = __('Please Assign a Dealer')
+    return
+  }
+
   if (!existingContactChecked.value && existingContact.value) {
     existingContact.value = ''
   }
@@ -157,6 +176,7 @@ async function convertToDeal() {
     deal: deal.doc,
     existing_contact: existingContact.value,
     existing_organization: existingOrganization.value,
+    assign_dealer: assignDealer.value,
   }).catch((err) => {
     if (err.exc_type == 'MandatoryError') {
       const errorMessage = err.messages
@@ -181,6 +201,7 @@ async function convertToDeal() {
     existingOrganizationChecked.value = false
     existingContact.value = ''
     existingOrganization.value = ''
+    assignDealer.value = ''
     error.value = ''
     updateOnboardingStep('convert_lead_to_deal', true, false, () => {
       localStorage.setItem('firstDeal' + user, _deal)
