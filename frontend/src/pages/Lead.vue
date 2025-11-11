@@ -294,7 +294,7 @@ import {
   Tooltip,
   usePageMeta,
 } from 'frappe-ui'
-import { computed, nextTick, ref, watch, onMounted } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 const { brand } = getSettings()
@@ -412,7 +412,7 @@ usePageMeta(() => {
 const tabs = computed(() => {
   let tabOptions = [
     {
-      name: 'Details',
+      name: 'Data',
       label: __('Details'),
       icon: DetailsIcon,
     },
