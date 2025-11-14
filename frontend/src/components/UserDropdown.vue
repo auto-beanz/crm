@@ -152,12 +152,12 @@ function getStandardItem(item) {
         onClick: () => confirmLoginToFrappeCloud(),
         condition: () => !isMobileView.value && window.is_fc_site,
       }
-    case 'about':
-      return {
-        icon: item.icon,
-        label: __(item.label),
-        onClick: () => (showAboutModal.value = true),
-      }
+    // case 'about':
+    //   return {
+    //     icon: item.icon,
+    //     label: __(item.label),
+    //     onClick: () => (showAboutModal.value = true),
+    //   }
     case 'logout':
       return {
         icon: item.icon,
