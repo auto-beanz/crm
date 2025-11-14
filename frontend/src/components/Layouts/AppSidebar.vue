@@ -219,11 +219,11 @@ const links = [
     icon: ContactsIcon,
     to: 'Contacts',
   },
-  {
-    label: 'Vehicles',
-    icon: VehiclesIcon,
-    to: 'Vehicles',
-  },
+  // {
+  //   label: 'Vehicles',
+  //   icon: VehiclesIcon,
+  //   to: 'Vehicles',
+  // },
   {
     label: 'Organizations',
     icon: OrganizationsIcon,

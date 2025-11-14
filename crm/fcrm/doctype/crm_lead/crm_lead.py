@@ -214,12 +214,84 @@ class CRMLead(Document):
 			return contact
 
 		return False
+	
+	def create_customer(self, contact=None):
+		"""
+		Create or fetch a Customer record for the lead.
+		"""
+		if self.custom_prospect_type == "Company" and self.organization:
+			existing_customer = frappe.db.exists("Customer", {"customer_name": self.organization})
+			if existing_customer:
+				# Add the new contact to the existing customer
+				customer_doc = frappe.get_doc("Customer", existing_customer)
+				if contact:
+					# Check if the contact already exists in the customer
+					if customer_doc.customer_primary_contact != contact:
+						customer_doc.customer_primary_contact = contact
+						customer_doc.save(ignore_permissions=True)
+						self.link_contact_to_customer(contact, customer_doc.name, customer_doc.customer_name)
+				return existing_customer
+			
+		elif self.custom_prospect_type == "Individual":
+			# Check if a Customer already exists
+			existing_customer = frappe.db.exists(
+				"Customer", {"customer_primary_contact": contact}
+			)
+			if existing_customer:
+				return existing_customer
 
-	def create_deal(self, contact, organization, deal=None):
+		# Create a new Customer record
+		customer = frappe.new_doc("Customer")
+		customer_name = (f"{self.first_name or ''} {self.last_name or ''}".strip()
+			if self.custom_prospect_type == "Individual"
+			else self.organization
+		)
+		customer.update(
+			{
+				"salutation": self.salutation,
+				"customer_name": customer_name,
+				"customer_type": "Company" if self.custom_prospect_type == "Company" else "Individual",
+				"customer_primary_contact": contact,
+				"industry": self.industry,
+				"email_id": self.email,
+				"mobile_no": self.mobile_no,
+				"website": self.website,
+			}
+		)
+		customer.insert(ignore_permissions=True)
+		customer.reload()
+
+		if contact:
+			self.link_contact_to_customer(contact, customer.name, customer.customer_name)
+
+		return customer.name
+
+	def link_contact_to_customer(self, contact, customer_name, customer_title):
+		"""
+		Link a Contact to a Customer in the Contact's links table.
+		"""
+		contact_doc = frappe.get_doc("Contact", contact)
+		# Check if the Customer is already linked
+		existing_link = any(
+			link.link_doctype == "Customer" and link.link_name == customer_name
+			for link in contact_doc.links
+		)
+		if not existing_link:
+			contact_doc.append(
+				"links",
+				{
+					"link_doctype": "Customer",
+					"link_name": customer_name,
+					"link_title": customer_title,
+				},
+			)
+			contact_doc.save(ignore_permissions=True)
+
+	def create_deal(self, contact, organization, customer, deal=None):
 		new_deal = frappe.new_doc("CRM Deal")
 
 		lead_deal_map = {
-			"lead_owner": "deal_owner",
+			#"lead_owner": "deal_owner",
 		}
 
 		restricted_fieldtypes = [
@@ -273,6 +345,7 @@ class CRMLead(Document):
 			{
 				"lead": self.name,
 				"contacts": [{"contact": contact}],
+				"custom_customer": customer,
 			}
 		)
 
@@ -416,5 +489,6 @@ def convert_to_deal(lead, doc=None, deal=None, existing_contact=None, existing_o
 		lead.db_set("communication_status", "Replied")
 	contact = lead.create_contact(existing_contact, False)
 	organization = lead.create_organization(existing_organization)
-	_deal = lead.create_deal(contact, organization, deal)
+	customer = lead.create_customer(contact)
+	_deal = lead.create_deal(contact, organization, customer, deal)
 	return _deal
