@@ -85,6 +85,18 @@ const routes = [
     component: () => import('@/pages/CallLogs.vue'),
   },
   {
+    alias: '/bulk-whatsapp',
+    path: '/bulk-whatsapp/view/:viewType?',
+    name: 'BulkWhatsapp',
+    component: () => import('@/pages/BulkWhatsapp.vue'),
+  },
+  {
+    path: '/bulk-whatsapp/:id',
+    name: 'BulkWhatsappMessage',
+    component: () => import('@/pages/BulkWhatsappMessage.vue'),
+    props: true,
+  },
+  {
     alias: '/vehicles',
     path: '/vehicles/view/:viewType?',
     name: 'Vehicles',
@@ -106,6 +118,7 @@ const routes = [
     name: 'Invalid Page',
     component: () => import('@/pages/InvalidPage.vue'),
   },
+  
 ]
 
 const handleMobileView = (componentName) => {
