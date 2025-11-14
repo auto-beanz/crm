@@ -189,6 +189,7 @@ import {
 import { computed, h, markRaw, onMounted, reactive, ref } from 'vue'
 import LucideLayoutDashboard from '~icons/lucide/layout-dashboard'
 import VehiclesIcon from '../Icons/VehiclesIcon.vue'
+import MessageBubbleIcon from '../Icons/MessageBubbleIcon.vue'
 
 const { getPinnedViews, getPublicViews } = viewsStore()
 const { toggle: toggleNotificationPanel } = notificationsStore()
@@ -243,6 +244,11 @@ const links = [
     label: 'Call Logs',
     icon: PhoneIcon,
     to: 'Call Logs',
+  },
+  {
+    label: 'Bulk Whatsapp',
+    icon: MessageBubbleIcon, 
+    to: 'BulkWhatsapp',
   },
 ]
 
@@ -308,6 +314,8 @@ function getIcon(routeName, icon) {
       return NoteIcon
     case 'Call Logs':
       return PhoneIcon
+    case 'BulkWhatsapp':
+      return MessageBubbleIcon
     default:
       return PinIcon
   }
