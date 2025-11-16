@@ -242,7 +242,7 @@ const { getFormattedPercent, getFormattedFloat, getFormattedCurrency } =
 
 const { users, getUser } = usersStore()
 
-let triggerOnChange
+/*let triggerOnChange
 let parentDoc
 
 if (!isGridRow) {
@@ -256,6 +256,37 @@ if (!isGridRow) {
   provide('triggerOnChange', triggerOnChange)
   provide('triggerOnRowAdd', triggerOnRowAdd)
   provide('triggerOnRowRemove', triggerOnRowRemove)
+} else {
+  triggerOnChange = inject('triggerOnChange', () => {})
+  parentDoc = inject('parentDoc')
+}*/
+
+const injectedTrigger = inject('triggerOnChange', null) 
+let triggerOnChange
+let parentDoc
+
+if (!isGridRow) {
+  if (injectedTrigger) {
+    triggerOnChange = injectedTrigger
+    
+    const { triggerOnRowAdd, triggerOnRowRemove } = useDocument(doctype, data.value.name)
+    provide('triggerOnChange', triggerOnChange)
+    provide('triggerOnRowAdd', triggerOnRowAdd)
+    provide('triggerOnRowRemove', triggerOnRowRemove)
+
+  } else {
+    
+    const {
+      triggerOnChange: trigger,
+      triggerOnRowAdd,
+      triggerOnRowRemove,
+    } = useDocument(doctype, data.value.name)
+    triggerOnChange = trigger
+
+    provide('triggerOnChange', triggerOnChange)
+    provide('triggerOnRowAdd', triggerOnRowAdd)
+    provide('triggerOnRowRemove', triggerOnRowRemove)
+  }
 } else {
   triggerOnChange = inject('triggerOnChange', () => {})
   parentDoc = inject('parentDoc')
