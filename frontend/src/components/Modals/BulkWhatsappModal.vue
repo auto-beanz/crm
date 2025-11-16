@@ -70,12 +70,10 @@ const show = defineModel()
 const router = useRouter()
 const error = ref(null)
 
-// 1. Get a new document for 'Bulk WhatsApp Message'
 const { document: bulkMessage, triggerOnChange } = useDocument('Bulk WhatsApp Message')
 
 provide('triggerOnChange', triggerOnChange)
 
-// 2. Fetch the 'Quick Entry' layout for 'Bulk WhatsApp Message'
 const tabs = createResource({
   url: 'crm.fcrm.doctype.crm_fields_layout.crm_fields_layout.get_fields_layout',
   cache: ['QuickEntry', 'Bulk WhatsApp Message'],
@@ -97,12 +95,10 @@ const tabs = createResource({
   },
 })
 
-// 3. Resource to create the document
 const insertMessage = createResource({
   url: 'frappe.client.insert',
 })
 
-// 4. Create and Submit logic
 async function createBulkMessage() {
   insertMessage.submit(
     {
@@ -160,16 +156,14 @@ async function createBulkMessage() {
   )
 }
 
-// 5. Logic for the "Edit fields layout" button
 function openQuickEntryModal() {
   showQuickEntryModal.value = true
-  quickEntryProps.value = { doctype: 'Bulk WhatsApp Message' } // Changed doctype
+  quickEntryProps.value = { doctype: 'Bulk WhatsApp Message' }
   nextTick(() => (show.value = false))
 }
 
-// 6. Set default values on load
 onMounted(() => {
-  // Defaults from your DocType
+  
   bulkMessage.doc = { 
     recipient_type: 'Individual',
     use_template: 1,
