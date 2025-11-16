@@ -242,7 +242,7 @@ const { getFormattedPercent, getFormattedFloat, getFormattedCurrency } =
 
 const { users, getUser } = usersStore()
 
-let triggerOnChange
+/*let triggerOnChange
 let parentDoc
 
 if (!isGridRow) {
@@ -257,6 +257,41 @@ if (!isGridRow) {
   provide('triggerOnRowAdd', triggerOnRowAdd)
   provide('triggerOnRowRemove', triggerOnRowRemove)
 } else {
+  triggerOnChange = inject('triggerOnChange', () => {})
+  parentDoc = inject('parentDoc')
+}*/
+
+const injectedTrigger = inject('triggerOnChange', null) // Try to get trigger from parent
+let triggerOnChange
+let parentDoc
+
+if (!isGridRow) {
+  if (injectedTrigger) {
+    // Found a provided trigger (This is your MODAL) ---
+    triggerOnChange = injectedTrigger
+    
+    // We still need to provide for any potential child grids (Tables)
+    const { triggerOnRowAdd, triggerOnRowRemove } = useDocument(doctype, data.value.name)
+    provide('triggerOnChange', triggerOnChange)
+    provide('triggerOnRowAdd', triggerOnRowAdd)
+    provide('triggerOnRowRemove', triggerOnRowRemove)
+
+  } else {
+    //No trigger provided (This is LEAD PAGE logic) ---
+    // Fall back to the old behavior
+    const {
+      triggerOnChange: trigger,
+      triggerOnRowAdd,
+      triggerOnRowRemove,
+    } = useDocument(doctype, data.value.name)
+    triggerOnChange = trigger
+
+    provide('triggerOnChange', triggerOnChange)
+    provide('triggerOnRowAdd', triggerOnRowAdd)
+    provide('triggerOnRowRemove', triggerOnRowRemove)
+  }
+} else {
+  // Grid row behavior is fine
   triggerOnChange = inject('triggerOnChange', () => {})
   parentDoc = inject('parentDoc')
 }

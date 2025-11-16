@@ -57,7 +57,7 @@ import { isMobileView } from '@/composables/settings'
 import { showQuickEntryModal, quickEntryProps } from '@/composables/modals'
 import { createResource, Dialog, Button, ErrorMessage, toast } from 'frappe-ui'
 import { useDocument } from '@/data/document'
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, provide } from 'vue'
 import { useRouter } from 'vue-router'
 
 const props = defineProps({
@@ -71,7 +71,9 @@ const router = useRouter()
 const error = ref(null)
 
 // 1. Get a new document for 'Bulk WhatsApp Message'
-const { document: bulkMessage } = useDocument('Bulk WhatsApp Message')
+const { document: bulkMessage, triggerOnChange } = useDocument('Bulk WhatsApp Message')
+
+provide('triggerOnChange', triggerOnChange)
 
 // 2. Fetch the 'Quick Entry' layout for 'Bulk WhatsApp Message'
 const tabs = createResource({
