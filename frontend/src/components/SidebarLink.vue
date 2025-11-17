@@ -1,7 +1,9 @@
 <template>
   <button
     class="flex h-7 cursor-pointer items-center rounded text-ink-gray-7 duration-300 ease-in-out focus:outline-none focus:transition-none focus-visible:rounded focus-visible:ring-2 focus-visible:ring-outline-gray-3"
-    :class="isActive ? 'bg-surface-selected shadow-sm' : 'hover:bg-surface-gray-2'"
+    :class="
+      isActive ? 'bg-surface-selected shadow-sm' : 'hover:bg-surface-gray-2'
+    "
     @click="handleClick"
   >
     <div
@@ -76,7 +78,12 @@ function handleClick() {
   if (typeof props.to === 'object') {
     router.push(props.to)
   } else {
-    router.push({ name: props.to })
+    if (props.to.startsWith('/')) {
+      window.location.href = props.to
+      return
+    } else {
+      router.push({ name: props.to })
+    }
   }
   if (isMobileView.value) {
     mobileSidebarOpened.value = false

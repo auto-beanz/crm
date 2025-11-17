@@ -128,10 +128,10 @@ function dropdownItemObj(item) {
 
 function getStandardItem(item) {
   switch (item.name1) {
-    case 'app_selector':
-      return {
-        component: markRaw(Apps),
-      }
+    // case 'app_selector':
+    //   return {
+    //     component: markRaw(Apps),
+    //   }
     case 'toggle_theme':
       return {
         icon: theme.value === 'dark' ? 'sun' : item.icon,
