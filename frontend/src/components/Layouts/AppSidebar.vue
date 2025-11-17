@@ -247,8 +247,13 @@ const links = [
   },
   {
     label: 'Bulk Whatsapp',
-    icon: MessageBubbleIcon, 
+    icon: MessageBubbleIcon,
     to: 'BulkWhatsapp',
+  },
+  {
+    label: 'Helpdesk',
+    icon: CRMLogo,
+    to: '/helpdesk/tickets',
   },
 ]
 
