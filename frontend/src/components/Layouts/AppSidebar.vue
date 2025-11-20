@@ -158,6 +158,7 @@ import PinIcon from '@/components/Icons/PinIcon.vue'
 import SquareAsterisk from '@/components/Icons/SquareAsterisk.vue'
 import StepsIcon from '@/components/Icons/StepsIcon.vue'
 import TaskIcon from '@/components/Icons/TaskIcon.vue'
+import HelpDeskIcon from '@/components/Icons/HelpDeskIcon.vue'
 import Notifications from '@/components/Notifications.vue'
 import Section from '@/components/Section.vue'
 import Settings from '@/components/Settings/Settings.vue'
@@ -251,8 +252,8 @@ const links = [
     to: 'BulkWhatsapp',
   },
   {
-    label: 'Helpdesk',
-    icon: CRMLogo,
+    label: 'HelpDesk',
+    icon: HelpDeskIcon,
     to: '/helpdesk/tickets',
   },
 ]
