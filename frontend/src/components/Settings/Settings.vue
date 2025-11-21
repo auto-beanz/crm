@@ -164,17 +164,17 @@ const tabs = computed(() => {
         },
       ],
     },
-    {
-      label: __('Customization'),
-      items: [
-        {
-          label: __('Home Actions'),
-          component: markRaw(HomeActions),
-          icon: 'home',
-        },
-      ],
-      condition: () => isManager(),
-    },
+    // {
+    //   label: __('Customization'),
+    //   items: [
+    //     {
+    //       label: __('Home Actions'),
+    //       component: markRaw(HomeActions),
+    //       icon: 'home',
+    //     },
+    //   ],
+    //   condition: () => isManager(),
+    // },
     {
       label: __('Integrations', null, 'FCRM'),
       items: [
@@ -190,12 +190,12 @@ const tabs = computed(() => {
           component: markRaw(WhatsAppSettings),
           condition: () => isWhatsappInstalled.value && isManager(),
         },
-        {
-          label: __('ERPNext'),
-          icon: ERPNextIcon,
-          component: markRaw(ERPNextSettings),
-          condition: () => isManager(),
-        },
+        // {
+        //   label: __('ERPNext'),
+        //   icon: ERPNextIcon,
+        //   component: markRaw(ERPNextSettings),
+        //   condition: () => isManager(),
+        // },
       ],
       condition: () => isManager() || isTelephonyAgent(),
     },
